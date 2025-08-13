@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=1800)  # Cache lebih lama untuk kurangkan panggilan API
 def fetch_crypto_data():
     try:
         url = "https://api.coingecko.com/api/v3/simple/price"
@@ -23,46 +23,25 @@ def fetch_crypto_data():
             "include_24hr_change": "true",
             "include_market_cap": "true"
         }
-        
         with st.spinner("📡 Fetching live crypto data..."):
             response = requests.get(url, params=params, timeout=15)
-        
         if response.status_code == 200:
             data = response.json()
             if data and isinstance(data, dict) and len(data) > 0:
                 st.success("✅ Live crypto data fetched successfully!")
                 return data
             else:
-                st.warning("⚠️ Invalid response format from CoinGecko API")
                 return generate_fallback_crypto_data()
         elif response.status_code == 429:
-            st.warning("⚠️ API rate limit exceeded. Using fallback data.")
+            # Terus guna fallback tanpa warning
             return generate_fallback_crypto_data()
         elif response.status_code == 403:
-            st.warning("⚠️ API access forbidden. Your network may be blocking cryptocurrency APIs.")
             return generate_fallback_crypto_data()
         elif response.status_code >= 500:
-            st.warning("⚠️ CoinGecko API server error. Using fallback data.")
             return generate_fallback_crypto_data()
         else:
-            st.warning(f"⚠️ API request failed with status code: {response.status_code}")
             return generate_fallback_crypto_data()
-            
-    except requests.exceptions.Timeout:
-        st.warning("⚠️ Request timeout - CoinGecko API is slow to respond")
-        return generate_fallback_crypto_data()
-    except requests.exceptions.ConnectionError:
-        st.warning("⚠️ Connection error - This usually means:")
-        st.info("• Your network may be blocking cryptocurrency APIs")
-        st.info("• Corporate firewall restrictions")
-        st.info("• ISP blocking certain domains")
-        st.info("• Using fallback data instead")
-        return generate_fallback_crypto_data()
-    except requests.exceptions.RequestException as e:
-        st.warning(f"⚠️ Network error: {e}")
-        return generate_fallback_crypto_data()
-    except Exception as e:
-        st.error(f"❌ Unexpected error fetching crypto data: {e}")
+    except Exception:
         return generate_fallback_crypto_data()
 
 def generate_fallback_crypto_data():
@@ -556,86 +535,6 @@ elif page == "💹 Crypto Odds":
             'BTC_Change': np.random.normal(0, 3, 100),
             'Home_Win_Rate': np.random.normal(0.45, 0.1, 100) + np.random.normal(0, 0.05, 100) * np.random.normal(0, 3, 100) / 10
         })
-        
-        correlation = np.corrcoef(correlation_data['BTC_Change'], correlation_data['Home_Win_Rate'])[0, 1]
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("BTC Price vs Home Win Rate Correlation", f"{correlation:.3f}")
-            if abs(correlation) > 0.3:
-                st.success("Strong correlation detected!")
-            elif abs(correlation) > 0.1:
-                st.info("Moderate correlation detected")
-            else:
-                st.warning("Weak correlation detected")
-        
-        with col2:
-            fig = px.scatter(correlation_data, x='BTC_Change', y='Home_Win_Rate',
-                           title="BTC Price Change vs Home Win Rate")
-            st.plotly_chart(fig, use_container_width=True)
-
-
-elif page == "📈 Analytics":
-    st.header("📈 Performance Analytics & Insights")
-    st.markdown("Track prediction accuracy and analyze betting performance.")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Total Predictions", "156", "+12 this week")
-    with col2:
-        st.metric("Accuracy Rate", "73.2%", "+2.1% vs last month")
-    with col3:
-        st.metric("Profit/Loss", "+$1,247", "+$89 this week")
-    with col4:
-        st.metric("Best Streak", "8 wins", "Current: 3 wins")
-    
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("📊 Weekly Performance")
-        weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4']
-        accuracy = [68, 72, 75, 73]
-        profit = [120, -45, 180, 95]
-        
-        fig = px.line(x=weeks, y=accuracy, title="Prediction Accuracy (%)")
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        st.subheader("💰 Weekly Profit/Loss")
-        fig = px.bar(x=weeks, y=profit, title="Weekly Profit/Loss ($)",
-                    color=profit, color_continuous_scale=["red", "yellow", "green"])
-        st.plotly_chart(fig, use_container_width=True)
-    
-    st.markdown("---")
-    st.subheader("📋 Detailed Performance Log")
-    
-    performance_data = pd.DataFrame({
-        'Date': pd.date_range(start='2024-01-01', end='2024-01-31', freq='D'),
-        'Match': [f"Team {chr(65+i)} vs Team {chr(66+i)}" for i in range(31)],
-        'Prediction': np.random.choice(['Home Win', 'Draw', 'Away Win'], 31),
-        'Actual': np.random.choice(['Home Win', 'Draw', 'Away Win'], 31),
-        'Odds': np.random.uniform(1.5, 3.0, 31),
-        'Stake': np.random.choice([10, 20, 50, 100], 31),
-        'Result': np.random.choice(['Win', 'Loss'], 31, p=[0.73, 0.27]),
-        'Profit': np.random.uniform(-100, 200, 31)
-    })
-    
-    performance_data['Profit'] = np.where(performance_data['Result'] == 'Win', 
-                                        performance_data['Stake'] * (performance_data['Odds'] - 1),
-                                        -performance_data['Stake'])
-    
-    st.dataframe(performance_data, use_container_width=True)
-    
-    if st.button("📥 Export Performance Data"):
-        csv = performance_data.to_csv(index=False)
-        st.download_button(
-            label="Download CSV",
-            data=csv,
-            file_name="soccer_crypto_performance.csv",
-            mime="text/csv"
-        )
 
 
 
