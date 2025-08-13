@@ -174,12 +174,14 @@ def diagnose_connection_issue():
             st.info("• Geographic restrictions")
 
 
+# Sidebar Navigation - Custom Navbar
 st.sidebar.title("⚽ Soccer Crypto")
 st.sidebar.markdown("---")
 
-page = st.sidebar.radio(
-    "Navigate to:",
-    ("🏠 Home", "📊 Match Prediction", "💹 Crypto Odds", "📈 Analytics")
+nav_option = st.sidebar.selectbox(
+    "Menu",
+    ["🏠 Home", "📊 Match Prediction", "💹 Crypto Odds", "📈 Analytics"],
+    index=0
 )
 
 st.sidebar.markdown("---")
@@ -225,7 +227,7 @@ with col2:
             st.sidebar.error(f"❌ Error running network test: {e}")
 
 
-if page == "🏠 Home":
+if nav_option == "🏠 Home":
     st.title("⚽ Soccer Crypto Dashboard")
     st.markdown("### Welcome to the Future of Sports Betting! 🚀")
     
@@ -276,7 +278,7 @@ if page == "🏠 Home":
         st.info("📡 Crypto data not available. Please check your internet connection.")
 
 
-elif page == "📊 Match Prediction":
+elif nav_option == "📊 Match Prediction":
     st.header("📊 AI Match Prediction Engine")
     st.markdown("Get intelligent predictions based on team performance and crypto market conditions.")
     
@@ -383,7 +385,7 @@ elif page == "📊 Match Prediction":
     st.dataframe(recent_matches, use_container_width=True)
 
 
-elif page == "💹 Crypto Odds":
+elif nav_option == "💹 Crypto Odds":
     st.header("💹 Live Crypto Market & Soccer Correlation")
     st.markdown("Analyze how cryptocurrency market trends influence soccer match predictions.")
     
