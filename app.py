@@ -177,10 +177,6 @@ def diagnose_connection_issue():
 st.sidebar.title("⚽ Soccer Crypto")
 st.sidebar.markdown("---")
 
-st.sidebar.page_link("app.py", label="🏠 Home", icon="🏠")
-st.sidebar.page_link("Match_Prediction.py", label="📊 Match Prediction", icon="📊")
-st.sidebar.page_link("Crypto_Odds.py", label="💹 Crypto Odds", icon="💹")
-
 page = st.sidebar.radio(
     "Navigate to:",
     ("🏠 Home", "📊 Match Prediction", "💹 Crypto Odds", "📈 Analytics")
